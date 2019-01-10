@@ -20,6 +20,12 @@
 
 
 
+## 特别注意！
+
+ **在wechat.py中更改Request URL和RequestHeaders**
+
+
+
 * get_link(filename) 	是第一种版本 ，自己手动去调接口，复制json数据写入json.txt中，再进行分析下载
 * get_api()                         为最新版本，只需要按我的步骤获取公众号的第一个Request URL，就能获取所有文章，并进行分析下载
 * all_link.txt                      为每个文章的链接，顺便写出来的。
