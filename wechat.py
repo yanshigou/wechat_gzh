@@ -1,13 +1,10 @@
 # encoding: utf-8
 import requests
 import re
-import sys
+
 import random
 from time import sleep
-import json
-import xlrd
-import sys
-import xlwt
+import datetime
 import urllib
 from urllib import request
 
@@ -55,12 +52,22 @@ Agent = ["Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gec
 
 # begin 从0-125 每一页增加5
 # Request_URL = 'https://mp.weixin.qq.com/cgi-bin/appmsg?token=118126570&lang=zh_CN&f=json&ajax=1&random=0.4320727522988903&action=list_ex&begin=0&count=5&query=&fakeid=MzUyMTc1ODU5OQ%3D%3D&type=9'
-Request_URL = 'https://mp.weixin.qq.com/cgi-bin/appmsg?token=118126570&lang=zh_CN&f=json&ajax=1&random=0.734833606349133&action=list_ex&begin=0&count=5&query=%E4%BB%8A%E6%97%A5%E5%A5%B3%E7%A5%9E&fakeid=MzUyMTc1ODU5OQ%3D%3D&type=9'
+
 
 filename = 'C:\\Users\\shenz\\Desktop\\爬取公众号图片\\json.txt'
 
 def randomAgent():
-    headers = {'User-Agent': random.choice(Agent)}
+    headers = {
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,und;q=0.7',
+        'Connection': 'keep-alive',
+        'Cookie': 'pgv_pvid=7399856351; RK=Ja7IpVGQOx; ptcz=e2a36259170c12ad0b4646246fca07aa51e00824e7271e4882a99436465aacab; pgv_pvi=9272560640; eas_sid=P1v5w4x2x5b9g7y0r1r6A2u3G6; tvfe_boss_uuid=4a3533846e277b0f; o_cookie=569578851; pac_uid=1_569578851; ua_id=B5D2BWpnoVXXLwY1AAAAAPAQA71Hgn7AXFbdmB8F9iU=; mm_lang=zh_CN; ts_uid=1209233964; _ga=GA1.2.1521282740.1546589452; pgv_si=s9994278912; cert=Rz8nkJpZ0kBsznwEZp5PZtmN0htDfQjb; uin=o0569578851; skey=@6Ydr88cCK; ticket=9732689e6debc8320cc7a5f4065e567727468f4c; ticket_id=gh_5e71e75d20a6; sig=h010729a8a4496676c0724182df5d5a96ef1b59b4d80278018dee9a5d948087bb6fa6bb4984f30d8e0b; uuid=a116778a5d152c5b0b7dc2a371ccfe93; bizuin=3592808330; noticeLoginFlag=1; data_bizuin=3592808330; data_ticket=2Y7MwoR4YrTnbysXfC0eVq/rDLRHeS6IpWwnmgZCqz5MnXKTiQ1+4cs+RrE87eoz; slave_sid=cG1KMkxwd25OZkI4MWROc3IxeVRGdW9WZmNSMEMwc19sVHZrUmpTazRLQXg3WUQ5WVB5YmFwcHVnNEZBelUyTGpualVwSFNXOHk2MTVQZ1prcTFJNzRKVXJWNEtXRXFmRWF2ZHZGM29jU2dJMFlMcUp3WnhQN3RSNUtsbDFkSVN3MDZGc1ltdElUdVYyam1z; slave_user=gh_5e71e75d20a6; xid=9dff1ae75480bc73d56b0fdcdff99ecb; openid2ticket_oiucl1r8xOZ3BJ_d8IURn4Kk5wgk=AqPRu5ceOWgCh8UHhxL6ZzQDKTuakejh2LAng3hniuk=',
+        'Host': 'mp.weixin.qq.com',
+        'Referer': 'https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit&action=edit&type=10&isMul=1&isNew=1&lang=zh_CN&token=157228290',
+        'X-Requested-With': 'XMLHttpRequest',
+        'User-Agent': random.choice(Agent)
+    }
     # print(headers)
     return headers
 
@@ -74,20 +81,45 @@ def get_link(filename):
         # print(link)
         for i in link:
             API2.append(i)
-
     return API2
 
-def get_api(Request_URL):
+
+def get_api():
     headers = randomAgent()
-    res = requests.get(Request_URL, headers=headers).content
-    res = json.loads(res)
-    print(res)
+    # 格式begin={0}
+    Request_URL = 'https://mp.weixin.qq.com/cgi-bin/appmsg?token=157228290&lang=zh_CN&f=json&ajax=1&random=' \
+                  '0.8145651837652705&action=list_ex&begin={0}&count=5&query=' \
+                  '%E4%BB%8A%E6%97%A5%E5%A5%B3%E7%A5%9E&fakeid=MzUyMTc1ODU5OQ%3D%3D&type=9'
+    # URL = []
+    API2 = []
+    f1 = open('all_link.txt', 'w+', encoding='utf-8')
+    for i in range(0, 501, 5):
+        sleep(1)
+        # URL.append(Request_URL.format(i))
+        src = Request_URL.format(i)
+        # print(URL)
+        res = requests.get(src, headers=headers)
+        # print(res.content)
+        # print(res.text)
+        link = re.findall(r'http://.*?#rd', res.text, re.S)
+        if link is []:
+            break
+        for x in link:
+            API2.append(x)
+            f1.write(x + sep)
+    # print(API2)
+    print('文章数：', len(API2))
+
+    f1.close()
+
+    return API2
 
 
 def xiazai(API2):
     imgName = 0
     for API in API2:
         headers = randomAgent()
+        sleep(1)
         res = requests.get(API, headers=headers)
         # res = requests.get(API, headers=headers)
         # print(res.text)
@@ -109,6 +141,10 @@ def xiazai(API2):
 
 
 if __name__ == '__main__':
-    API2 = get_link(filename)
+    t1 = datetime.datetime.now()
+    # API2 = get_link(filename) # json.txt 自己获取
+    # xiazai(API2)
+    API2 = get_api()  # 脚本获取
     xiazai(API2)
-    # get_api(Request_URL)
+    t2 = datetime.datetime.now()
+    print('耗时：', t2-t1)
